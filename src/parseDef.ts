@@ -42,6 +42,7 @@ import { JsonSchema7UnionType, parseUnionDef } from "./parsers/union.js";
 import { JsonSchema7UnknownType, parseUnknownDef } from "./parsers/unknown.js";
 import { Refs, Seen } from "./Refs.js";
 import { parseReadonlyDef } from "./parsers/readonly.js";
+import { JsonSchema7IfThenElseType, parseDiscriminatedUnionDef } from "./parsers/discriminatedUnion.js";
 
 type JsonSchema7RefType = { $ref: string };
 type JsonSchema7Meta = {
@@ -51,6 +52,7 @@ type JsonSchema7Meta = {
 };
 
 export type JsonSchema7TypeUnion =
+  | JsonSchema7IfThenElseType
   | JsonSchema7StringType
   | JsonSchema7ArrayType
   | JsonSchema7NumberType
@@ -77,6 +79,8 @@ export type JsonSchema7TypeUnion =
   | JsonSchema7SetType;
 
 export type JsonSchema7Type = JsonSchema7TypeUnion & JsonSchema7Meta;
+
+export type JsonSchema7 = JsonSchema7Type | boolean;
 
 export function parseDef(
   def: ZodTypeDef,
@@ -174,8 +178,9 @@ const selectParser = (
       return parseNullDef(refs);
     case ZodFirstPartyTypeKind.ZodArray:
       return parseArrayDef(def, refs);
-    case ZodFirstPartyTypeKind.ZodUnion:
     case ZodFirstPartyTypeKind.ZodDiscriminatedUnion:
+      return parseDiscriminatedUnionDef(def, refs);
+    case ZodFirstPartyTypeKind.ZodUnion:
       return parseUnionDef(def, refs);
     case ZodFirstPartyTypeKind.ZodIntersection:
       return parseIntersectionDef(def, refs);
